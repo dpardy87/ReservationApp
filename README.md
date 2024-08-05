@@ -1,9 +1,5 @@
 # Reservation App
 
-## build the image
+## build and run container via docker-compose (--build ensures images are rebuilt)
 
-`docker build -t flask-app .`
-
-## run container
-
-`docker run -p 5001:5000 flask-app`
+`docker-compose up --build`
