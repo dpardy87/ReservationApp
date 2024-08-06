@@ -1,0 +1,38 @@
+Table venues {
+  id int [pk]
+  name varchar
+  location varchar
+  capacity int
+}
+
+Table seats {
+  id int [pk]
+  venue_id int [ref: > venues.id]
+  section varchar
+  row varchar
+  number varchar
+  is_held boolean [default: false] // indicates if a seat is currently held
+}
+
+Table customers {
+  id int [pk]
+  name varchar
+  email varchar
+  phone varchar
+}
+
+Table reservations {
+  id int [pk]
+  seat_id int [ref: > seats.id]
+  customer_id int [ref: > customers.id]
+  reservation_date datetime
+  event_date datetime
+}
+
+Table seat_holds {
+  id int [pk]
+  seat_id int [ref: > seats.id]
+  customer_id int [ref: > customers.id]
+  hold_start_time datetime
+  expiration_time datetime
+}
