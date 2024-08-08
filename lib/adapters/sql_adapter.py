@@ -41,7 +41,7 @@ class SqlAdapter:
                 else:
                     return None
         except SQLAlchemyError as e:
-            self.handle_sqlalchemy_error(e)
+            raise
 
     def insert(self, query):
         """Executes an insert query to the SQL client"""
@@ -49,7 +49,7 @@ class SqlAdapter:
             with self.engine.connect() as conn:
                 conn.execute(query)
         except SQLAlchemyError as e:
-            self.handle_sqlalchemy_error(e)
+            raise
 
 
 class PostgresAdapter(SqlAdapter):

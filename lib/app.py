@@ -4,7 +4,7 @@ import os
 import sys
 from flask import Flask, render_template
 from adapters.sql_adapter import SqlAdapter
-from handlers import ReservationHandler
+from handler import ReservationHandler
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../conf/")
 import config
