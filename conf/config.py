@@ -5,13 +5,7 @@ import urllib
 
 class Config:
     def __init__(self):
-        self.PGSQL_DB_NAME = "reservation_system"
-        self.PGSQL_USER = "dp"
-        self.PGSQL_PW = "password"
-        self.PGSQL_HOST = "localhost"
-        self.PGSQL_PORT = "5432"
-        self.PGSQL_CONN_STR = f"postgresql://{self.PGSQL_USER}:{self.PGSQL_PW}@{self.PGSQL_HOST}:{self.PGSQL_PORT}/{self.PGSQL_DB_NAME}"
-
+        self.PGSQL_CONN_STR = 'postgresql://barbro:blackmoor@192.168.96.2:5432/reservation_system'
     def serialize(self):
         return self.__dict__
 
