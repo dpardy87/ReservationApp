@@ -1,59 +1,42 @@
-"""file for handling connecting and executing sql commands"""
-
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
-
-# path for sql certs if required
-module_path = os.path.abspath(__file__)
-root_dir = os.path.abspath(os.path.join(module_path, "..", ".."))
-SSL_CERT = os.path.join(root_dir, "")
 
 
 class SqlAdapter:
-    """base adapter for sql operations"""
+    """adapter for SQL operations"""
 
-    def __init__(self, conn_str, use_ssl=False):
+    def __init__(self, conn_str):
         self.conn_str = conn_str
-        self.engine = None
-        self.create_engine(use_ssl)
+        self.connection = self.create_connection()
 
-    def create_engine(self, use_ssl):
-        """Creates SQLAlchemy engine with optional SSL"""
+    def create_connection(self):
+        """Creates and returns a psycopg2 connection."""
         try:
-            if use_ssl:
-                self.engine = create_engine(
-                    self.conn_str,
-                    connect_args={"sslmode": "require", "sslrootcert": SSL_CERT},
-                )
-            else:
-                self.engine = create_engine(self.conn_str)
-        except SQLAlchemyError as e:
-            raise ConnectionError(f"Failed to create SQL engine: {str(e)}")
+            self.connection = psycopg2.connect(self.conn_str)
+            return self.connection
+        except psycopg2.OperationalError as e:
+            raise ConnectionError(f"Failed to connect to the database: {str(e)}")
 
-    def execute(self, query, fetch_all=True):
-        """executes query to sql client"""
+    def execute(self, query):
+        """Executes a SQL query and returns the result as a list of dictionaries."""
+        cur = self.connection.cursor()
         try:
-            with self.engine.connect() as conn:
-                result = conn.execute(query)
-                if result.returns_rows:
-                    return result.fetchall() if fetch_all else result.fetchone()
-                else:
-                    return None
-        except SQLAlchemyError as e:
-            self.handle_sqlalchemy_error(e)
-
-    def insert(self, query):
-        """Executes an insert query to the SQL client"""
-        try:
-            with self.engine.connect() as conn:
-                conn.execute(query)
-        except SQLAlchemyError as e:
-            self.handle_sqlalchemy_error(e)
-
-
-class PostgresAdapter(SqlAdapter):
-    """Adapter for PostgreSQL-specific operations"""
-
-    def __init__(self, conn_str, use_ssl=False):
-        super().__init__(conn_str, use_ssl)
+            cur.execute(query)
+            rows = cur.fetchall()
+            columns = [
+                desc[0] for desc in cur.description
+            ]  # Get column names from the cursor
+            results = [
+                dict(zip(columns, row)) for row in rows
+            ]  # Map each row to a dictionary
+            self.connection.commit()
+            return results
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Error occurred: {e}")
+            return None
+        finally:
+            cur.close()
