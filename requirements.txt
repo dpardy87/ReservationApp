@@ -1,4 +1,4 @@
 flask
-psycopg2-binary
+psycopg2
 faker
 sqlalchemy

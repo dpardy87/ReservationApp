@@ -2,7 +2,7 @@
 """entrypoint for application"""
 import os
 import sys
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from adapters.sql_adapter import SqlAdapter
 from handler import ReservationHandler
 
@@ -11,14 +11,16 @@ import config
 
 app = Flask(__name__)
 
+handler = None
+
 
 def get_handler():
     """returns handler obj"""
-    sql_adapter = SqlAdapter(app.config.get("PGSQL_CONN_STR"))
-    handler = ReservationHandler(
-        sql_adapter=sql_adapter
-    )
+    db_url = app.config.get("PGSQL_CONN_STR")
+    sql_adapter = SqlAdapter(db_url)
+    handler = ReservationHandler(sql_adapter=sql_adapter)
     return handler
+
 
 @app.route("/")
 def home():
@@ -26,10 +28,13 @@ def home():
     return render_template("home.html")
 
 
-@app.route("/about")
-def about():
-    """docstring for about"""
-    return "This is the about page"
+@app.route("/api/reservations", methods=["GET"])
+def get_reservations():
+    try:
+        reservations = handler.get_reservations()
+        return jsonify(reservations)
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
 
 
 def load_config(env):
@@ -56,4 +61,5 @@ if __name__ == "__main__":
     # just hardcode to dev for the time being
     environment = "dev"
     load_config(environment)
+    handler = get_handler()
     app.run(host="0.0.0.0", port=5000, debug=app.debug)
