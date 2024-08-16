@@ -32,13 +32,17 @@ def home():
 def get_reservations():
     try:
         reservations = handler.get_reservations()
+        app.logger.debug(f"Returned {len(reservations)} reservations.")
         return jsonify(reservations)
     except Exception as ex:
+        app.logger.error(f"Error fetching reservations: {ex}")
         return jsonify({"error": str(ex)}), 500
 
 
 def load_config(env):
     """load_config docstring"""
+
+    # hardcode to dev config for now
     config_map = {"dev": config.DevelopmentConfig().serialize()}
 
     # get config based on env parameter

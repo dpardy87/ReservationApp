@@ -5,13 +5,6 @@ services:
     build: .
     ports:
       - "5001:5000"
-    environment:
-      FLASK_APP: lib/app.py
-      FLASK_DEBUG: 1
-      DATABASE_HOST: reservationapp-postgres-1
-      DATABASE_USER: barbro
-      DATABASE_PASSWORD: blackmoor
-      DATABASE_NAME: reservation_system
     volumes:
       - .:/app  # mount current dir into container
     command: python3 lib/app.py
